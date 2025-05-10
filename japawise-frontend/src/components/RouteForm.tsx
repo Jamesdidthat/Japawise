@@ -1,38 +1,51 @@
 import React, { useState } from 'react';
-import { getRouteFromOpenAI } from '../utils/openaiClient'; // Make sure the path is correct
+import { HashLoader } from 'react-spinners';
 
-const RouteForm: React.FC = () => {
-  const [from, setFrom] = useState('Lekki');
-  const [to, setTo] = useState('');
+interface RouteFormProps {
+  from: string;
+  to: string;
+  setFrom: React.Dispatch<React.SetStateAction<string>>;
+  setTo: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSuggestRoute = async () => {
+  const handleSuggestRoute = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
     if (!from || !to) {
       setError("Please enter both locations");
       return;
     }
-    
+
     setLoading(true);
     setError(null);
     setResult('');
-    
+
     try {
-      console.log(`Finding route from ${from} to ${to}...`);
-      const response = await getRouteFromOpenAI(from, to);
-      console.log("Got response:", response);
-      setResult(response);
+      const response = await fetch('http://localhost:3001/api/route', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from, to }),
+      });
+
+      const data = await response.json();
+      setResult(data.result);
     } catch (error: any) {
-      console.error("Error in component:", error);
-      setError(error.message || "Something went wrong. Try again.");
+      setError("Failed to fetch route.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto border border-gray-200 rounded-lg overflow-hidden">
+    <form
+      onSubmit={handleSuggestRoute}
+      className="w-full max-w-md mx-auto border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+    >
       {/* Inputs */}
       <div className="p-4 border-b border-gray-100">
         <label className="block text-sm text-gray-500 mb-1">Where u dey?</label>
@@ -54,30 +67,37 @@ const RouteForm: React.FC = () => {
           placeholder="Enter destination"
         />
       </div>
-      
-      {/* Button */}
+
+      {/* Button with spinner */}
       <button
-        className="w-full bg-orange-500 text-white py-4 px-6 text-lg font-medium"
-        onClick={handleSuggestRoute}
+        type="submit"
+        className="w-full bg-orange-500 text-white py-4 px-6 text-lg font-medium flex justify-center items-center"
         disabled={loading}
       >
-        {loading ? "Finding..." : "Suggest route"}
+        {loading ? <HashLoader size={25} color="#fff" /> : "Suggest route"}
       </button>
-      
+
+      {/* Optional loading text */}
+      {loading && (
+        <p className="text-sm text-gray-500 mt-2 text-center">
+          Finding best danfo for you 🚐...
+        </p>
+      )}
+
       {/* Error message */}
       {error && (
         <div className="p-4 border-t border-gray-100 text-sm text-red-600">
           {error}
         </div>
       )}
-      
+
       {/* Result */}
       {result && (
         <div className="p-4 border-t border-gray-100 text-sm whitespace-pre-wrap">
           {result}
         </div>
       )}
-    </div>
+    </form>
   );
 };
 
