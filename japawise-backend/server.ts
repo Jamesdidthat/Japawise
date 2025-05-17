@@ -18,7 +18,7 @@ app.post('/api/route', async (req, res) => {
 
   const prompt = `Give simple danfo/keke directions from ${from} to ${to} in Lagos. Use bullet points. Be local and clear. End with “You’ve reached ${to}!”
   
-  Don't use '*' when answering. Just use '•' for bullet points. Don't use '1.', '2.', etc. You can also include instance where okada is necessary.
+  Don't use '*' when answering. Just use '•' for bullet points. Don't use '1.', '2.', etc.
   `;
 
   try {

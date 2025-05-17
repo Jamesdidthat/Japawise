@@ -14,7 +14,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="px-4 py-8">
-      <h1 className="text-3xl md:text-4xl font-bold text-center mb-10">
+      <h1 className="text-3xl md:text-4xl font-bold text-center mb-10 mt-10">
         Find the best route<br />for your journey
       </h1>
 
