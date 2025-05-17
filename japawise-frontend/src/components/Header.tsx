@@ -36,11 +36,12 @@ const Header: React.FC = () => {
         )}
         <div className="flex items-center">
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6 mr-4">
-            <Link to="/" className="text-gray-800 hover:text-gray-600">
+          <nav className="hidden md:flex items-center space-x-14 mr-4">
+            <Link to="/" className="text-gray-800 font-bold hover:text-gray-600"
+            style={{ color: "#585123" }}>
               Home
             </Link>
-            <Link to="/about" className="text-gray-800 hover:text-gray-600">
+            <Link to="/about" className="text-gray-800 font-bold hover:text-gray-600">
               About
             </Link>
           
@@ -50,7 +51,7 @@ const Header: React.FC = () => {
                
                 <button
                   onClick={() => signOut(auth)}
-                  className="text-red-500 border border-red-500 px-3 py-1 rounded hover:bg-red-100"
+                  className="text-red-500 border border-red-500 px-3 py-1 rounded hover:bg-red-100 ml-12"
                 >
                   Log Out
                 </button>
@@ -58,7 +59,7 @@ const Header: React.FC = () => {
             ) : (
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+                className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 ml-12"
               >
                 Log In
               </button>
@@ -79,7 +80,7 @@ const Header: React.FC = () => {
           {menuOpen && (
             <div className="absolute top-16 right-0 bg-white shadow-md py-2 px-4 rounded md:hidden z-50">
               <nav className="flex flex-col space-y-2">
-                <Link to="/" className="text-gray-800 hover:text-gray-600">
+                <Link to="/" className="text-gray-800 hover:text-gray-600 ">
                   Home
                 </Link>
                 <Link to="/about" className="text-gray-800 hover:text-gray-600">

@@ -44,11 +44,11 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
   return (
     <form
       onSubmit={handleSuggestRoute}
-      className="w-full max-w-md mx-auto border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+      className="w-full max-w-md mx-auto border border-black-200 rounded-lg overflow-hidden shadow-sm"
     >
       {/* Inputs */}
-      <div className="p-4 border-b border-gray-100">
-        <label className="block text-sm text-gray-500 mb-1">Where u dey?</label>
+      <div className="p-4 border-b border-black-100">
+        <label className="block text-sm text-500 mb-1">Where u dey?</label>
         <input
           type="text"
           value={from}
@@ -58,7 +58,7 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
         />
       </div>
       <div className="p-4 border-b border-gray-100">
-        <label className="block text-sm text-gray-500 mb-1">Where u dey go?</label>
+        <label className="block text-sm text-500 mb-1">Where u dey go?</label>
         <input
           type="text"
           value={to}
