@@ -8,7 +8,7 @@
 
 - 🔍 Get clear bullet-point directions for any Lagos route
 - 👤 Modal-based user authentication (Firebase Auth)
-- 🧠 AI-powered responses via OpenRouter (GPT-based)
+- 🧠 AI-powered responses via GeminiAi (GPT-based)
 - 💾 Saves user-specific route queries (soon)
 - 🌆 Stylish UI with background image and Tailwind CSS
 
@@ -17,7 +17,7 @@
 ## 🚀 Technologies Used
 
 - Frontend: React + TypeScript + Tailwind CSS
-- Backend: Node.js + Express + OpenRouter API
+- Backend: Node.js + Express + Gemini API
 - Authentication: Firebase Auth
-- AI: OpenRouter (`tngtech/deepseek-r1t-chimera:free`)
-- Deployment: (Coming soon)
+- AI: Gemini
+- Still in development though
