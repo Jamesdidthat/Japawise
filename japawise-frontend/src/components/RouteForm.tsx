@@ -26,7 +26,7 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
     setResult('');
 
     try {
-      const response = await fetch('http://localhost:3001/api/route', {
+      const response = await fetch('https://japawise.onrender.com/api/route', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ from, to }),
