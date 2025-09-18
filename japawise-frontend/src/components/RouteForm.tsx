@@ -42,62 +42,67 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
   };
 
   return (
-    <form
-      onSubmit={handleSuggestRoute}
-      className="w-full max-w-md mx-auto border border-black-200 rounded-lg overflow-hidden shadow-sm"
-    >
-      {/* Inputs */}
-      <div className="p-4 border-b border-black-100">
-        <label className="block text-sm text-500 mb-1">Where u dey?</label>
-        <input
-          type="text"
-          value={from}
-          onChange={(e) => setFrom(e.target.value)}
-          className="w-full text-lg focus:outline-none"
-          placeholder="Enter starting point"
-        />
-      </div>
-      <div className="p-4 border-b border-gray-100">
-        <label className="block text-sm text-500 mb-1">Where u dey go?</label>
-        <input
-          type="text"
-          value={to}
-          onChange={(e) => setTo(e.target.value)}
-          className="w-full text-lg focus:outline-none"
-          placeholder="Enter destination"
-        />
-      </div>
-
-      {/* Button with spinner */}
-      <button
-        type="submit"
-        className="w-full bg-orange-500 text-white py-4 px-6 text-lg font-medium flex justify-center items-center"
-        disabled={loading}
+    <div className="relative w-full max-w-md mx-auto">
+      <form
+        onSubmit={handleSuggestRoute}
+        className="border border-gray-200 rounded-lg overflow-hidden shadow-sm"
       >
-        {loading ? <HashLoader size={25} color="#fff" /> : "Suggest route"}
-      </button>
-
-      {/* Optional loading text */}
-      {loading && (
-        <p className="text-sm text-gray-500 mt-2 text-center">
-          Finding best danfo for you 🚐...
-        </p>
-      )}
-
-      {/* Error message */}
-      {error && (
-        <div className="p-4 border-t border-gray-100 text-sm text-red-600">
-          {error}
+        {/* Inputs */}
+        <div className="p-4 border-b border-gray-100">
+          <label className="block text-sm text-gray-500 mb-1">Where u dey?</label>
+          <input
+            type="text"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className="w-full text-lg focus:outline-none"
+            placeholder="Enter starting point"
+          />
         </div>
-      )}
+        <div className="p-4 border-b border-gray-100">
+          <label className="block text-sm text-gray-500 mb-1">Where u dey go?</label>
+          <input
+            type="text"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            className="w-full text-lg focus:outline-none"
+            placeholder="Enter destination"
+          />
+        </div>
 
-      {/* Result */}
+        {/* Button with spinner */}
+        <button
+          type="submit"
+          className="w-full bg-orange-500 text-white py-4 px-6 text-lg font-medium flex justify-center items-center"
+          disabled={loading}
+        >
+          {loading ? <HashLoader size={25} color="#fff" /> : "Suggest route"}
+        </button>
+
+        {/* Optional loading text */}
+        {loading && (
+          <p className="text-sm text-gray-500 mt-2 text-center">
+            Finding best danfo for you 🚐...
+          </p>
+        )}
+
+        {/* Error message */}
+        {error && (
+          <div className="p-4 border-t border-gray-100 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+      </form>
+
+      {/* Slide-out response box */}
       {result && (
-        <div className="p-4 border-t border-gray-100 text-sm whitespace-pre-wrap">
+        <div
+          className="absolute top-0 right-[-320px] w-72 h-full bg-white shadow-lg border-l border-gray-200 p-4 text-sm whitespace-pre-wrap transform transition-transform duration-500 ease-in-out"
+          style={{ transform: result ? 'translateX(0)' : 'translateX(100%)' }}
+        >
           {result}
         </div>
       )}
-    </form>
+    </div>
   );
 };
 
