@@ -93,15 +93,13 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
         )}
       </form>
 
-      {/* Slide-out response box */}
+      {/* Response box (auto expands with content) */}
       {result && (
-        <div
-          className="absolute top-0 right-[-320px] w-72 h-full bg-white shadow-lg border-l border-gray-200 p-4 text-sm whitespace-pre-wrap transform transition-transform duration-500 ease-in-out"
-          style={{ transform: result ? 'translateX(0)' : 'translateX(100%)' }}
-        >
+        <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-white shadow-sm text-sm whitespace-pre-wrap">
           {result}
         </div>
       )}
+
     </div>
   );
 };
