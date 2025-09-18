@@ -42,10 +42,13 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
   };
 
   return (
-    <div className="relative w-full max-w-md mx-auto">
+    <div className="relative flex justify-center items-start w-full max-w-4xl mx-auto">
+      {/* RouteForm */}
       <form
         onSubmit={handleSuggestRoute}
-        className="border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+        className={`border border-gray-200 rounded-lg overflow-hidden shadow-sm transition-all duration-500 ${
+          result ? 'mr-80' : ''
+        } w-full max-w-md`}
       >
         {/* Inputs */}
         <div className="p-4 border-b border-gray-100">
@@ -93,13 +96,14 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
         )}
       </form>
 
-      {/* Response box (auto expands with content) */}
+      {/* Slide-out response box */}
       {result && (
-        <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-white shadow-sm text-sm whitespace-pre-wrap">
+        <div
+          className="absolute top-0 left-150 w-100 bg-white shadow-lg border-l border-gray-200 p-4 text-lg whitespace-pre-wrap transition-transform duration-500 ease-in-out"
+        >
           {result}
         </div>
       )}
-
     </div>
   );
 };
