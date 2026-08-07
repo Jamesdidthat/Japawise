@@ -1,104 +1,128 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import japawise_logo from '../assets/JapaWise logo.svg';
-import AuthModal from '../AuthModal'; // Adjust path if needed
-import { auth } from '../firebase'; // Adjust path if needed
-import { signOut, onAuthStateChanged} from 'firebase/auth';
+import AuthModal from '../AuthModal';
+import { auth } from '../firebase';
+import { signOut, onAuthStateChanged, type User } from 'firebase/auth';
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, (user) => {
-    setCurrentUser(user);
-  });
-  return () => unsubscribe(); // clean up on unmount
-}, []);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  const linkClass = (path: string) =>
+    `rounded-full px-4 py-2 text-sm font-semibold transition ${
+      location.pathname === path
+        ? 'bg-[#5f4518] text-white shadow-sm'
+        : 'text-[#5c4b2a] hover:bg-[#f3ead7] hover:text-[#2f2614]'
+    }`;
+
+  const mobileLinkClass = (path: string) =>
+    `rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+      location.pathname === path
+        ? 'bg-[#5f4518] text-white'
+        : 'bg-white text-[#5c4b2a] border border-[#e6d9be] hover:bg-[#f7f1e3]'
+    }`;
 
 
   return (
     <>
-      <header className="flex justify-between items-center px-5 py-8 max-w-screen-xl mx-auto">
-        <div className="h-10 flex items-center">
-          <img
-            src={japawise_logo}
-            alt="JapaWise"
-            className="h-full w-auto"
-          />
-        </div>
+      <header className="sticky top-0 z-50 border-b border-[#eadfca] bg-white/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-4 md:px-6">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={japawise_logo} alt="JapaWise" className="h-10 w-auto" />
+            
+          </Link>
 
-        {currentUser && (
-           <p className="text-gray-700 font-medium">
-                  Howfar {currentUser.displayName || 'you'}!
-                </p>
-        )}
-        <div className="flex items-center">
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-14 mr-4">
-            <Link to="/" className="text-gray-800 font-bold hover:text-gray-600"
-            style={{ color: "#585123" }}>
-              Home
-            </Link>
-            <Link to="/about" className="text-gray-800 font-bold hover:text-gray-600">
-              About
-            </Link>
-          
+          <div className="hidden items-center gap-6 md:flex">
+            <nav className="flex items-center gap-2 rounded-full border border-[#e6d9be] bg-[#fbf7ef] p-1 shadow-sm">
+              <Link to="/" className={linkClass('/')}>
+                Home
+              </Link>
+              <Link to="/about" className={linkClass('/about')}>
+                About
+              </Link>
+            </nav>
+
+            {currentUser && (
+              <div className="hidden lg:block rounded-full border border-[#e6d9be] bg-[#fff8eb] px-4 py-2 text-sm font-medium text-[#5d4e2d]">
+                Howfar, {currentUser.displayName || 'you'}!
+              </div>
+            )}
 
             {currentUser ? (
-              <>
-               
-                <button
-                  onClick={() => signOut(auth)}
-                  className="text-red-500 border border-red-500 px-3 py-1 rounded hover:bg-red-100 ml-12"
-                >
-                  Log Out
-                </button>
-              </>
+              <button
+                onClick={() => signOut(auth)}
+                className="rounded-full border border-[#d86b5c] px-4 py-2 text-sm font-semibold text-[#c53d2d] transition hover:bg-[#fff1ef]"
+              >
+                Log Out
+              </button>
             ) : (
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 ml-12"
+                className="rounded-full bg-[#f28c28] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#dd7d18]"
               >
                 Log In
               </button>
             )}
+          </div>
 
-          </nav>
-
-          {/* Mobile Menu Button */}
           <button
-            className="p-1 md:hidden focus:outline-none"
+            className="inline-flex items-center justify-center rounded-full border border-[#e6d9be] bg-white p-3 text-[#5c4b2a] shadow-sm transition hover:bg-[#f7f1e3] md:hidden"
             aria-label="Menu"
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            <span className="text-3xl">≡</span>
+            <span className="text-2xl leading-none">≡</span>
           </button>
+        </div>
 
-          {/* Mobile Menu */}
-          {menuOpen && (
-            <div className="absolute top-16 right-0 bg-white shadow-md py-2 px-4 rounded md:hidden z-50">
-              <nav className="flex flex-col space-y-2">
-                <Link to="/" className="text-gray-800 hover:text-gray-600 ">
-                  Home
-                </Link>
-                <Link to="/about" className="text-gray-800 hover:text-gray-600">
-                  About
-                </Link>
+        {menuOpen && (
+          <div className="border-t border-[#eadfca] bg-white/95 px-4 py-4 shadow-lg md:hidden">
+            <nav className="mx-auto flex max-w-screen-xl flex-col gap-3">
+              <Link to="/" className={mobileLinkClass('/')}>
+                Home
+              </Link>
+              <Link to="/about" className={mobileLinkClass('/about')}>
+                About
+              </Link>
+
+              {currentUser && (
+                <div className="rounded-2xl border border-[#e6d9be] bg-[#fff8eb] px-4 py-3 text-sm font-medium text-[#5d4e2d]">
+                  Howfar, {currentUser.displayName || 'you'}!
+                </div>
+              )}
+
+              {currentUser ? (
                 <button
-                  onClick={() => {
-                    setShowAuthModal(true);
-                    setMenuOpen(false);
-                  }}
-                  className="text-left bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600"
+                  onClick={() => signOut(auth)}
+                  className="rounded-2xl border border-[#d86b5c] px-4 py-3 text-left text-sm font-semibold text-[#c53d2d] transition hover:bg-[#fff1ef]"
+                >
+                  Log Out
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="rounded-2xl bg-[#f28c28] px-4 py-3 text-left text-sm font-semibold text-white shadow-sm transition hover:bg-[#dd7d18]"
                 >
                   Log In
                 </button>
-              </nav>
-            </div>
-          )}
-        </div>
+              )}
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Auth Modal */}

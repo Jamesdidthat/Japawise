@@ -6,12 +6,14 @@ interface RouteFormProps {
   to: string;
   setFrom: React.Dispatch<React.SetStateAction<string>>;
   setTo: React.Dispatch<React.SetStateAction<string>>;
+  onRouteResult?: (payload: { from: string; to: string; result: string }) => void;
 }
 
-const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
+const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo, onRouteResult }) => {
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
   const handleSuggestRoute = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -26,29 +28,35 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
     setResult('');
 
     try {
-      const response = await fetch('https://japawise.onrender.com/api/route', {
+      const response = await fetch(`${apiBaseUrl}/api/route`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ from, to }),
       });
 
-      const data = await response.json();
-      setResult(data.result);
+      const rawText = await response.text();
+      const data = rawText ? JSON.parse(rawText) : {};
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Failed to fetch route.');
+      }
+
+      const routeResult = data.result || 'No route found.';
+      setResult(routeResult);
+      onRouteResult?.({ from, to, result: routeResult });
     } catch (error: any) {
-      setError("Failed to fetch route.");
+      setError(error?.message || 'Failed to fetch route.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative flex justify-center items-start w-full max-w-4xl mx-auto">
+    <div className="flex flex-col gap-6 justify-center items-center w-full max-w-4xl mx-auto">
       {/* RouteForm */}
       <form
         onSubmit={handleSuggestRoute}
-        className={`border border-gray-200 rounded-lg overflow-hidden shadow-sm transition-all duration-500 ${
-          result ? 'mr-80' : ''
-        } w-full max-w-md`}
+        className="w-full max-w-md border border-gray-200 rounded-lg overflow-hidden shadow-sm transition-all duration-500 bg-white"
       >
         {/* Inputs */}
         <div className="p-4 border-b border-gray-100">
@@ -96,11 +104,9 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo }) => {
         )}
       </form>
 
-      {/* Slide-out response box */}
+      {/* Route response */}
       {result && (
-        <div
-          className="absolute top-0 left-150 w-100 bg-white shadow-lg border-l border-gray-200 p-4 text-lg whitespace-pre-wrap transition-transform duration-500 ease-in-out"
-        >
+        <div className="w-full max-w-md bg-white shadow-lg border border-gray-200 rounded-lg p-4 text-lg whitespace-pre-wrap text-gray-900">
           {result}
         </div>
       )}

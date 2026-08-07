@@ -1,70 +1,74 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import path from 'path';
+import OpenAI from 'openai';
 
 
-dotenv.config();
+// Load .env from the backend folder explicitly to avoid cwd issues
+dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '.env.example'), override: false });
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const geminiApiKey = process.env.GEMINI_API_KEY;
-if (!geminiApiKey) {
-  throw new Error("GEMINI_API_KEY environment variable is not set.");
+const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+const openRouterModel = process.env.OPENROUTER_MODEL || '~openai/gpt-latest';
+const openrouterClient = openRouterApiKey
+  ? new OpenAI({
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey: openRouterApiKey,
+      dangerouslyAllowBrowser: false,
+    })
+  : null;
+
+if (!openrouterClient) {
+  console.warn('OPENROUTER_API_KEY not set — route requests will fail until it is configured.');
 }
-const genAI = new GoogleGenerativeAI(geminiApiKey); // Initialize with the apiKey property
 
 app.post('/api/route', async (req, res) => {
   const { from, to } = req.body;
 
   const prompt = `
-  Give simple danfo or keke or okada public transport directions from "${from}" to "${to}" in Lagos, Nigeria. 
+  You are JapaWise, a Lagos public transport assistant.
 
-  Instructions:
-  - Prioritiz danfo public transport directions.
-  - Start with clear bullet points only. Use the • symbol for each step.
-  - Take into consideration the minor roads/routes that allows for the use of okada or keke.
-  - Use a friendly, local, and concise tone.
-  - Mention notable Lagos landmarks and local language (like “Underbridge”, “tell conductor”, “come down”).
-  - Don’t include thinking, alternatives, analysis, or “let me think” type responses.
-  - Keep it brief, local, and clear
-  - Do NOT use a numbered list. Use bullet points (•) only.
-  - End the response with: “You’ve reached ${to}!”.
+  Give the best possible danfo/keke/okada route guidance from "${from}" to "${to}" in Lagos.
+  If you are unsure about a detail, do not invent specific bus stops or landmarks.
+  Use short bullet points only with the • symbol.
+  Keep it local, practical, and concise.
+  Mention known Lagos landmarks only when useful.
+  End with: “You’ve reached ${to}!”.
   `;
 
   try {
-    // For Gemini, you select the model and then create a chat session
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const chat = model.startChat({
-      history: [
-        // You can add past messages here if you want to maintain conversation context.
-        // For a single-turn prompt like this, it's not strictly necessary.
-      ],
-      generationConfig: {
-        temperature: 0.6,
-      },
-    });
-
-    const result = await chat.sendMessage(prompt);
-    const response = await result.response;
-    const content = response.text(); // Get the text content from the Gemini response
-
-    if (!content) {
-      throw new Error("No content returned from Gemini API.");
+    if (!openrouterClient) {
+      res.status(500).json({ error: 'OPENROUTER_API_KEY is not configured.' });
+      return;
     }
 
-    // Clean up: remove duplicates, empty lines, and trim spacing
+    const response = await openrouterClient.chat.completions.create({
+      model: openRouterModel,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 400,
+    });
+
+    const content = response.choices?.[0]?.message?.content ?? '';
+
+    if (!content) {
+      throw new Error('No content returned from OpenRouter API.');
+    }
+
     const cleaned = content
       .split('\n')
       .map((line: string) => line.trim())
-      .filter((line: any, index: any, arr: string | any[]) => line && arr.indexOf(line) === index)
+      .filter((line: string, index: number, arr: string[]) => line && arr.indexOf(line) === index)
       .join('\n');
 
     res.status(200).json({ result: cleaned || 'No route found.' });
   } catch (err) {
-    console.error("Gemini API error:", err);
-    res.status(500).json({ error: "Sorry, I couldn’t find a route at the moment." });
+    console.error('OpenRouter API error:', err);
+    res.status(500).json({ error: 'Sorry, I couldn’t find a route at the moment.' });
   }
 });
 
