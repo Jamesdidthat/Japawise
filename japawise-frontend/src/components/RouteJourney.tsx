@@ -29,7 +29,7 @@ const DanfoIcon: React.FC = () => (
   </svg>
 );
 
-function getSteps(result: string, steps: RouteStep[]) {
+function getSteps(result: string, steps: RouteStep[]): RouteStep[] {
   if (steps.length) return steps;
   const cleanValue = (value: string) => {
     try {
@@ -70,7 +70,7 @@ function getSteps(result: string, steps: RouteStep[]) {
     .split('\n')
     .map((line) => line.replace(/^\s*[•*-]\s*/, '').trim())
     .filter(Boolean)
-    .map((instruction) => ({ instruction }));
+    .map((instruction) => ({ instruction, place: '' }));
 }
 
 const RouteJourney: React.FC<RouteJourneyProps> = ({ from, to, result, steps }) => {
