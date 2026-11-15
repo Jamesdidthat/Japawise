@@ -39,12 +39,18 @@ app.post('/api/route', (req, res) => __awaiter(void 0, void 0, void 0, function*
     var _a, _b, _c, _d;
     const { from, to } = req.body;
     const prompt = `
+  IMPORTANT OUTPUT FORMAT: Return ONLY valid JSON with this shape:
+  {"steps":[{"instruction":"One complete direction bullet without its bullet symbol","place":"A real stop, junction, or landmark explicitly named in that bullet, or empty string"}]}
+  Return no more than 6 concise steps, with enough detail to complete the trip and reach the destination.
+  Put every direction inside the steps list in route order. Do not add guessed stops, coordinates, fares, or details. The interface adds the supplied origin and destination around the step sequence.
+
   You are JapaWise, a Lagos public transport assistant.
 
   Give the best possible danfo/keke/okada route guidance from "${from}" to "${to}" in Lagos.
   If you are unsure about a detail, do not invent specific bus stops or landmarks.
-  Use short bullet points only with the • symbol.
+  Write one concise instruction per step, without bullet symbols; the app formats instructions as bullets.
   Keep it local, practical, and concise.
+  The JSON wrapper is required; apply the bullet and ending rules below to each step instruction.
   Mention known Lagos landmarks only when useful.
   End with: “You’ve reached ${to}!”.
   `;
@@ -57,18 +63,83 @@ app.post('/api/route', (req, res) => __awaiter(void 0, void 0, void 0, function*
             model: openRouterModel,
             messages: [{ role: 'user', content: prompt }],
             temperature: 0.7,
-            max_tokens: 400,
+            max_tokens: 900,
         });
-        const content = (_d = (_c = (_b = (_a = response.choices) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.message) === null || _c === void 0 ? void 0 : _c.content) !== null && _d !== void 0 ? _d : '';
+        const choice = (_a = response.choices) === null || _a === void 0 ? void 0 : _a[0];
+        const content = (choice === null || choice === void 0 ? void 0 : choice.message.content) !== null && (choice === null || choice === void 0 ? void 0 : choice.message.content) !== void 0 ? choice.message.content : '';
+        if ((choice === null || choice === void 0 ? void 0 : choice.finish_reason) === 'length') {
+            console.warn(`Route response reached the ${900}-token output limit for model ${openRouterModel}.`);
+        }
         if (!content) {
             throw new Error('No content returned from OpenRouter API.');
         }
-        const cleaned = content
+        let structured = null;
+        const jsonCandidate = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+        try {
+            const parsed = JSON.parse(jsonCandidate);
+            if (parsed && typeof parsed === 'object')
+                structured = parsed;
+        }
+        catch (_e) {
+            const firstBrace = content.indexOf('{');
+            const lastBrace = content.lastIndexOf('}');
+            if (firstBrace >= 0 && lastBrace > firstBrace) {
+                try {
+                    const parsed = JSON.parse(content.slice(firstBrace, lastBrace + 1));
+                    if (parsed && typeof parsed === 'object')
+                        structured = parsed;
+                }
+                catch (_e) {
+                    // Recover readable fields from JSON that was cut off before it closed.
+                }
+            }
+        }
+        const decodeModelString = (value) => {
+            try {
+                return JSON.parse(`"${value}"`);
+            }
+            catch (_e) {
+                return value.replace(/\\n/g, ' ').replace(/\\r/g, ' ').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+            }
+        };
+        const stepsFromContent = (field) => {
+            const values = [];
+            const matcher = new RegExp(`"${field}"\\s*:\\s*"((?:\\\\.|[^"\\\\])*)"?`, 'g');
+            let match;
+            while ((match = matcher.exec(content)) !== null)
+                values.push(decodeModelString(match[1]));
+            return values;
+        };
+        let steps = Array.isArray(structured === null || structured === void 0 ? void 0 : structured.steps)
+            ? structured.steps
+                .filter((step) => !!step && typeof step === 'object' && typeof step.instruction === 'string')
+                .map((step) => ({
+                instruction: step.instruction.trim(),
+                place: typeof step.place === 'string' ? step.place.trim() : '',
+            }))
+                .filter((step) => step.instruction)
+            : [];
+        if (!steps.length) {
+            const instructions = stepsFromContent('instruction');
+            const places = stepsFromContent('place');
+            steps = instructions
+                .map((instruction, index) => ({ instruction: instruction.trim(), place: (places[index] || '').trim() }))
+                .filter((step) => step.instruction);
+        }
+        const rawDirections = typeof (structured === null || structured === void 0 ? void 0 : structured.directions) === 'string'
+            ? structured.directions
+            : steps.length
+                ? steps.map((step) => `\u2022 ${step.instruction}`).join('\n')
+                : content;
+        const looksLikeJson = /^\s*[\[{]/.test(content) || /"steps"\s*:/.test(content);
+        const cleaned = (looksLikeJson && !steps.length && typeof (structured === null || structured === void 0 ? void 0 : structured.directions) !== 'string'
+            ? 'I could not format this route. Please try again.'
+            : rawDirections)
             .split('\n')
             .map((line) => line.trim())
             .filter((line, index, arr) => line && arr.indexOf(line) === index)
             .join('\n');
-        res.status(200).json({ result: cleaned || 'No route found.' });
+        res.status(200).json({ result: cleaned || 'No route found.', steps });
     }
     catch (err) {
         console.error('OpenRouter API error:', err);

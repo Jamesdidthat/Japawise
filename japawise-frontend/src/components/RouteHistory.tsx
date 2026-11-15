@@ -1,10 +1,12 @@
 import React from 'react';
+import type { RouteStep } from './RouteJourney';
 
 export type RouteHistoryItem = {
   id: string;
   from: string;
   to: string;
   result: string;
+  steps?: RouteStep[];
   searchedAt: string;
 };
 

@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashLoader } from 'react-spinners';
+import type { RouteStep } from './RouteJourney';
 
 interface RouteFormProps {
   from: string;
   to: string;
   setFrom: React.Dispatch<React.SetStateAction<string>>;
   setTo: React.Dispatch<React.SetStateAction<string>>;
-  onRouteResult?: (payload: { from: string; to: string; result: string }) => void;
+  onRouteResult: (payload: { from: string; to: string; result: string; steps: RouteStep[] }) => void;
 }
 
 const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo, onRouteResult }) => {
-  const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
+  useEffect(() => {
+    setError(null);
+  }, [from, to]);
 
   const handleSuggestRoute = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -25,7 +29,6 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo, onRoute
 
     setLoading(true);
     setError(null);
-    setResult('');
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/route`, {
@@ -42,8 +45,8 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo, onRoute
       }
 
       const routeResult = data.result || 'No route found.';
-      setResult(routeResult);
-      onRouteResult?.({ from, to, result: routeResult });
+      const routeSteps: RouteStep[] = Array.isArray(data.steps) ? data.steps : [];
+      onRouteResult({ from, to, result: routeResult, steps: routeSteps });
     } catch (error: any) {
       setError(error?.message || 'Failed to fetch route.');
     } finally {
@@ -103,13 +106,6 @@ const RouteForm: React.FC<RouteFormProps> = ({ from, to, setFrom, setTo, onRoute
           </div>
         )}
       </form>
-
-      {/* Route response */}
-      {result && (
-        <div className="w-full max-w-md bg-white shadow-lg border border-gray-200 rounded-lg p-4 text-lg whitespace-pre-wrap text-gray-900">
-          {result}
-        </div>
-      )}
     </div>
   );
 };

@@ -1,1 +1,98 @@
 @import "tailwindcss";
+
+.site-glass-nav {
+  position: sticky;
+  top: 0.85rem;
+  z-index: 50;
+  width: min(1280px, calc(100% - 2rem));
+  margin: 0.85rem auto 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  border-radius: 1.15rem;
+  background: rgba(255, 253, 246, 0.24);
+  box-shadow: 0 16px 42px rgba(54, 43, 23, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(26px) saturate(1.7);
+  -webkit-backdrop-filter: blur(26px) saturate(1.7);
+}
+
+.home-layout-background { position: relative; isolation: isolate; background: transparent; }
+.home-layout-background::before { position: fixed; z-index: -1; inset: -8px; background: linear-gradient(rgba(248, 243, 231, 0.58), rgba(248, 243, 231, 0.58)), url('/japawise_background.png') center / cover no-repeat; content: ''; filter: blur(7px); pointer-events: none; }
+.home-page-overlay { background: transparent; }
+
+.chat-shell { position: relative; isolation: isolate; display: grid; grid-template-columns: 255px minmax(0, 1fr); min-height: 100vh; background: transparent; color: #302817; }
+.chat-shell::before { position: fixed; z-index: -1; inset: -8px; background: linear-gradient(rgba(248, 243, 231, 0.58), rgba(248, 243, 231, 0.58)), url('/japawise_background.png') center / cover no-repeat; content: ''; filter: blur(7px); pointer-events: none; }
+.chat-sidebar { position: sticky; top: 0; display: flex; height: 100vh; min-height: 0; flex-direction: column; border-right: 1px solid rgba(231, 224, 210, 0.7); background: rgba(245, 242, 235, 0.55); padding: 1rem 0.8rem; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.chat-sidebar-top { display: grid; gap: 1rem; }
+.chat-brand { display: flex; align-items: center; padding: 0.25rem 0.35rem; text-decoration: none; }
+.chat-brand-logo { display: block; width: 9.6rem; height: auto; }
+.chat-new-route { display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center; gap: 0.45rem; border: 1px solid #d9cfba; border-radius: 0.8rem; background: #fffdf8; padding: 0.6rem 0.75rem; color: #51401f; font-size: 0.85rem; font-weight: 700; text-decoration: none; }
+.chat-new-route:hover { border-color: #bb9a59; background: #fff8e8; }
+.chat-history-heading { margin: 1.5rem 0 0.45rem; padding: 0 0.4rem; color: #897c61; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.14em; }
+.chat-history-list { display: flex; min-height: 0; flex: 1; flex-direction: column; gap: 0.2rem; overflow-y: auto; }
+.chat-history-item { display: flex; min-width: 0; align-items: center; gap: 0.5rem; border-radius: 0.65rem; padding: 0.62rem 0.5rem; color: #5d513a; font-size: 0.82rem; text-decoration: none; }
+.chat-history-item:hover { background: #eae5d9; }
+.chat-history-item-active { background: #e9dfc9; color: #3b2e14; font-weight: 700; }
+.chat-history-icon { flex: none; color: #a57a2b; }
+.chat-history-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-history-label span { color: #96896e; font-weight: 400; }
+.chat-history-empty { padding: 0 0.5rem; color: #8d8068; font-size: 0.8rem; line-height: 1.5; }
+.chat-account { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.7rem; border-top: 1px solid #e2dac9; padding: 0.75rem 0.25rem 0.1rem; }
+.chat-account-avatar { display: inline-flex; width: 1.8rem; height: 1.8rem; flex: none; align-items: center; justify-content: center; border-radius: 50%; background: #e5d4ae; color: #57431b; font-size: 0.7rem; font-weight: 800; }
+.chat-account-name { overflow: hidden; flex: 1; color: #64583f; font-size: 0.7rem; text-overflow: ellipsis; white-space: nowrap; }
+.chat-account button { border: 0; background: transparent; padding: 0.3rem; color: #80683a; font-size: 0.7rem; cursor: pointer; }
+.chat-account button:hover { color: #c53d2d; }
+
+.chat-main { min-width: 0; height: 100vh; overflow-y: auto; }
+.chat-topbar { display: flex; height: 2.5rem; justify-content: flex-end; padding: 0.65rem 1rem 0; }
+.chat-mobile-new { display: none; color: #76571d; font-size: 0.82rem; font-weight: 700; text-decoration: none; }
+.chat-conversation { width: min(100%, 850px); margin: 0 auto; padding: 2.2rem 2rem 4rem; }
+.chat-title-block { margin-bottom: 1.6rem; }
+.chat-title-block h1 { margin: 0; color: #302817; font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; line-height: 1.2; }
+.chat-title-block h1 span { padding: 0 0.3rem; color: #d98129; }
+.chat-new-conversation { display: flex; min-height: calc(100vh - 2.5rem); flex-direction: column; align-items: center; justify-content: center; padding: 1rem 2rem 4rem; }
+.chat-new-heading { display: flex; max-width: 34rem; flex-direction: column; align-items: center; margin-bottom: 1.6rem; text-align: center; }
+.chat-assistant-logo { display: block; width: 11rem; height: auto; object-fit: contain; }
+.chat-new-heading .chat-assistant-logo { margin-bottom: 0.8rem; }
+.chat-missing-route .chat-assistant-logo { margin-bottom: 0.5rem; }
+.chat-new-heading h1 { margin: 0; color: #302817; font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 800; }
+.chat-new-heading p { margin: 0.55rem 0 0; color: #7b705a; font-size: 0.9rem; line-height: 1.5; }
+.chat-new-conversation > div + div { width: 100%; }
+.chat-missing-route { display: flex; min-height: 70vh; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; }
+.chat-missing-route h1 { margin: 1rem 0 0.5rem; font-size: 1.4rem; }
+
+.journey-card { border-radius: 0.9rem; }
+.journey-steps { position: relative; display: grid; gap: 0.55rem; margin: 0; padding: 0.25rem 0 0.5rem; list-style: none; }
+.journey-steps::before { position: absolute; top: 1.4rem; bottom: 1.5rem; left: 1.35rem; width: 2px; background: repeating-linear-gradient(to bottom, #dfc994 0 6px, transparent 6px 11px); content: ''; }
+.journey-steps li { position: relative; z-index: 1; }
+.journey-step-button { display: flex; width: 100%; align-items: flex-start; gap: 0.75rem; border: 0; border-radius: 0.8rem; background: transparent; padding: 0.35rem; color: inherit; text-align: left; cursor: pointer; }
+.journey-visual-marker { display: flex; width: 2.1rem; min-height: 2.1rem; flex: none; align-items: center; justify-content: center; border-radius: 50%; background: #fcfbf8; }
+.journey-visual-marker > i { width: 0.7rem; height: 0.7rem; border: 2px solid #b8a16b; border-radius: 50%; background: #fff; }
+.danfo-icon { width: 2rem; height: 1.55rem; filter: drop-shadow(0 1px 1px rgba(64, 46, 12, .18)); }
+.journey-step-content { display: grid; width: 100%; gap: 0.35rem; border: 1px solid #eee8dc; border-radius: 0.75rem; background: #fff; padding: 0.75rem 0.85rem; transition: border-color 150ms ease, background 150ms ease; }
+.journey-step-button:hover .journey-step-content { border-color: #dfc783; }
+.journey-step-active .journey-step-content { border-color: #e5c581; background: #fffaf0; }
+.journey-step-active .journey-visual-marker > i { border-color: #df8a36; background: #f5c984; }
+.journey-board-label { color: #926b22; font-size: 0.64rem; font-weight: 850; letter-spacing: 0.1em; }
+.journey-step-instruction { color: #443923; font-size: 0.9rem; line-height: 1.6; }
+.journey-empty { margin: 0; padding: 0.5rem; color: #7c7059; font-size: 0.85rem; }
+
+@media (max-width: 760px) {
+  .chat-shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .chat-sidebar { position: static; height: auto; padding: 0.55rem 0.7rem 0.4rem; }
+  .chat-sidebar-top { display: flex; align-items: center; justify-content: space-between; gap: 0.7rem; }
+  .chat-brand-logo { width: 8rem; }
+  .chat-sidebar-top .chat-new-route { display: none; }
+  .chat-history-heading { margin: 0.55rem 0 0.3rem; }
+  .chat-history-list { flex: none; flex-direction: row; overflow-x: auto; overflow-y: hidden; }
+  .chat-history-item { flex: none; max-width: 13rem; border: 1px solid #e4ddce; background: rgba(255,255,255,.55); }
+  .chat-history-empty { margin: 0.2rem 0; }
+  .chat-main { height: auto; min-height: calc(100vh - 6rem); overflow: visible; }
+  .chat-topbar { height: 2.3rem; }
+  .chat-mobile-new { display: inline; }
+  .chat-conversation { padding: 1.15rem 0.9rem 2.5rem; }
+  .chat-new-conversation { min-height: calc(100vh - 7rem); padding: 0.5rem 1rem 2rem; }
+  .chat-assistant-logo { width: 9.5rem; }
+  .journey-step-button { gap: 0.55rem; padding: 0.28rem; }
+  .journey-steps::before { left: 1.23rem; }
+  .journey-step-content { padding: 0.68rem; }
+}

@@ -40,7 +40,7 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-[#eadfca] bg-white/85 backdrop-blur-md">
+      <header className="site-glass-nav z-50">
         <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-4 md:px-6">
           <Link to="/" className="flex items-center gap-3">
             <img src={japawise_logo} alt="JapaWise" className="h-10 w-auto" />
@@ -48,7 +48,12 @@ const Header: React.FC = () => {
           </Link>
 
           <div className="hidden items-center gap-6 md:flex">
-            <nav className="flex items-center gap-2 rounded-full border border-[#e6d9be] bg-[#fbf7ef] p-1 shadow-sm">
+            <nav className="flex items-center gap-2 rounded-full border border-white/60 bg-white/45 p-1 shadow-sm backdrop-blur-md">
+              {currentUser && (
+                <Link to="/chat/new" className={linkClass('/chat/new')}>
+                  Chats
+                </Link>
+              )}
               <Link to="/" className={linkClass('/')}>
                 Home
               </Link>
@@ -90,8 +95,13 @@ const Header: React.FC = () => {
         </div>
 
         {menuOpen && (
-          <div className="border-t border-[#eadfca] bg-white/95 px-4 py-4 shadow-lg md:hidden">
+          <div className="border-t border-white/60 bg-[#fffdf2]/85 px-4 py-4 shadow-lg backdrop-blur-xl md:hidden">
             <nav className="mx-auto flex max-w-screen-xl flex-col gap-3">
+              {currentUser && (
+                <Link to="/chat/new" className={mobileLinkClass('/chat/new')}>
+                  Chats
+                </Link>
+              )}
               <Link to="/" className={mobileLinkClass('/')}>
                 Home
               </Link>

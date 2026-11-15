@@ -1,8 +1,10 @@
 // HomePage.tsx
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import RouteForm from '../components/RouteForm';
 import PopularRoutes from '../components/PopularRoutes';
 import RouteHistory, { type RouteHistoryItem } from '../components/RouteHistory';
+import type { RouteStep } from '../components/RouteJourney';
 import { auth } from '../firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 
@@ -10,25 +12,30 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 const HomePage: React.FC = () => {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
   const [history, setHistory] = useState<RouteHistoryItem[]>([]);
+  const [historyLoadedFor, setHistoryLoadedFor] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const historyStorageKey = useMemo(() => {
     return `japawise-route-history:${currentUser?.uid ?? 'guest'}`;
   }, [currentUser?.uid]);
+  const visibleHistory = historyLoadedFor === historyStorageKey ? history : [];
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      if (user) navigate('/chat/new', { replace: true });
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const storedHistory = window.localStorage.getItem(historyStorageKey);
     if (!storedHistory) {
       setHistory([]);
+      setHistoryLoadedFor(historyStorageKey);
       return;
     }
 
@@ -37,26 +44,44 @@ const HomePage: React.FC = () => {
     } catch {
       setHistory([]);
     }
+    setHistoryLoadedFor(historyStorageKey);
   }, [historyStorageKey]);
 
   useEffect(() => {
+    if (historyLoadedFor !== historyStorageKey) return;
     window.localStorage.setItem(historyStorageKey, JSON.stringify(history));
-  }, [history, historyStorageKey]);
+  }, [history, historyLoadedFor, historyStorageKey]);
 
-  const handleRouteResult = ({ from: routeFrom, to: routeTo, result }: { from: string; to: string; result: string }) => {
+  const handleRouteResult = ({ from: routeFrom, to: routeTo, result, steps }: { from: string; to: string; result: string; steps: RouteStep[] }) => {
+    const targetHistoryKey = `japawise-route-history:${auth.currentUser?.uid ?? currentUser?.uid ?? 'guest'}`;
     const entry: RouteHistoryItem = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       from: routeFrom,
       to: routeTo,
       result,
+      steps,
       searchedAt: new Date().toISOString(),
     };
 
-    setHistory((previousHistory) => [entry, ...previousHistory].slice(0, 10));
+    let storedHistory: RouteHistoryItem[] = historyLoadedFor === targetHistoryKey ? history : [];
+    if (historyLoadedFor !== targetHistoryKey) {
+      try {
+        storedHistory = JSON.parse(window.localStorage.getItem(targetHistoryKey) || '[]');
+      } catch {
+        storedHistory = [];
+      }
+    }
+    const nextHistory = [entry, ...storedHistory].slice(0, 10);
+    window.localStorage.setItem(targetHistoryKey, JSON.stringify(nextHistory));
+    setHistory(nextHistory);
+    setHistoryLoadedFor(targetHistoryKey);
+    navigate(`/chat/${entry.id}`, { state: { conversation: entry, historyStorageKey: targetHistoryKey } });
   };
 
   const handleClearHistory = () => {
+    window.localStorage.setItem(historyStorageKey, '[]');
     setHistory([]);
+    setHistoryLoadedFor(historyStorageKey);
   };
 
   const highlights = [
@@ -86,11 +111,7 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div
-      className="min-h-screen bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url('/japawise_background.png')` }}
-    >
-      <div className="min-h-screen bg-[#f8f3e7]/85 backdrop-blur-sm px-4 py-8">
+    <div className="home-page-overlay min-h-screen px-4 py-8">
         <div className="max-w-screen-xl mx-auto">
           <section className="grid gap-10 lg:grid-cols-2 lg:items-center pt-6 pb-12">
             <div className="space-y-6">
@@ -152,7 +173,7 @@ const HomePage: React.FC = () => {
 
           <PopularRoutes onSelectRoute={handleSelectRoute} />
 
-          <RouteHistory history={history} onClear={handleClearHistory} />
+          <RouteHistory history={visibleHistory} onClear={handleClearHistory} />
 
           <section className="mt-14 grid gap-6 lg:grid-cols-3">
             {howItWorks.map((step) => (
@@ -190,7 +211,6 @@ const HomePage: React.FC = () => {
             </div>
           </section>
         </div>
-      </div>
     </div>
   );
 };
